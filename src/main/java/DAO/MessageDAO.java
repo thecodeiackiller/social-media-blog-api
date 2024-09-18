@@ -3,15 +3,16 @@ package DAO;
 
 import Util.ConnectionUtil;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import Model.Message;
 
 public class MessageDAO {
 
-    public Message postMessage(Message message)
+    public static Message postMessage(Message message)
     {
-        
-        
+
         // Requirements
         // 1. User should be able to post new message through endpoint http://localhost:8080/messages 
         // 2. Reponse body will contain JSON representaion of a message. Persist it to DB. JSON payload won't have message_id // NOTE: this is because its autoincremented
@@ -22,8 +23,9 @@ public class MessageDAO {
         // 5. Message has to be posted by a real user (check for this in service layer (message_id is foreign key to user_id)) // NOTE: We can probably just use the method we created in the AccountService class for this
         // 6. Reponse body should contain of JSON of the message including message_id. Reponse status should be 200
         // 7. New message should be persisted to the db
-        // 8. If message creation not successful, response status should be 400, which is a client side error
+        // 8. If message creation not successful, response status should be 400, which is a client side error (controller logic)
     
+        // NOTE: In order to actually follow through with this method, we have to make sure we pass all the conditionals in service layer
 
         try{
             Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
@@ -52,10 +54,8 @@ public class MessageDAO {
 
     }
 
-    public void getAllMessages()
-    {
-        throw new UnsupportedOperationException("Not yet implemented");
-        
+    public List<Message> getAllMessages()
+    {   
         // Requirements
         // 1. A a user, should be able to submit a GET request on enpoint localhost:8080/messages.
         // 2. The response body should contain a JSON representation of a list containing all messages retrieved from the database. 
@@ -64,20 +64,76 @@ public class MessageDAO {
         // 3. It is expected for the list to simply be empty if there are no messages. 
         // 4. The response status should always be 200, which is the default.
         
+        // NOTE: We used try catch here but try with resources should really be used to prevent resource leaks in prod env.
+        List<Message> messageList = new ArrayList<>();
+        try
+        {
+            Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
+            
+        String sql = "select * from message";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql); 
+        
+        ResultSet rs = preparedStatement.executeQuery();
+        // Need a ResultSet here as we are returning in the body of the JSON an Account along with its associated id
+        
+        while(rs.next())
+        {
+            Message newMessage = new Message();
+            newMessage.setMessage_id(rs.getInt("message_id"));
+            newMessage.setPosted_by(rs.getInt("posted_by"));
+            newMessage.setMessage_text(rs.getString("message_text"));
+            newMessage.setTime_posted_epoch(rs.getInt("time_posted_epoch"));
+
+            messageList.add(newMessage);
+        }
+        
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }  
+        return messageList;         
     }
 
-    public void getMessageById()
+    public Message getMessageById(int message_id)
     {
-        throw new UnsupportedOperationException("Not yet implemented");
-        
         // Requirements
         // 1. I should be able to submit a GET request on the endpoint GET localhost:8080/messages/{message_id}.
 
         // Conditions
         // 2. The response body should contain a JSON representation of the message identified by the message_id. 
         // 3. It is expected for the response body to simply be empty if there is no such message.
-        // 4. The response status should always be 200, which is the default.
+        // 4. The response status should always be 200, which is the default. AKA No 404 Client Side Error will be thrown here
 
+        // NOTE: Returning just nothing is safer when working with APIs and such so we don't run the risk of nullpointerrexception or something like that   
+        // Ultimately, we're returning a message here, whether it's properties have values or it's empty
+        Message message = new Message();
+        try
+        {
+            Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
+            
+        String sql = "select * from message where (account_id) = (?)";
+        
+        PreparedStatement preparedStatement = connection.prepareStatement(sql); 
+        preparedStatement.setInt(1,message_id);
+        
+        ResultSet rs = preparedStatement.executeQuery();
+        
+        // Need a ResultSet here as we are returning in the body of the JSON an Account along with its associated id
+        if (rs.next()) {
+             // Need to create an object like we did so that we can return (potentially) an object 
+            message.setMessage_id(rs.getInt("message_id"));
+            message.setMessage_text(rs.getString("message_text"));
+            message.setPosted_by(rs.getInt("posted_by"));
+            message.setTime_posted_epoch(rs.getLong("time_posted_epoch"));
+        }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        } 
+        
+        return message == null ? new Message() : message;
     }
 
     public void deleteMessageById()

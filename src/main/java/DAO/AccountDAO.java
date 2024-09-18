@@ -108,6 +108,40 @@ public class AccountDAO {
         return usernameList;
 
     }
+
+    public static Account verifyUserById(int userId)
+    {
+        // Basically, we want to see the the Account we return is null or if there's actual data.
+        // We want to return account and then get the username from the Account object that is returned
+        // If there is Account is null then we know our conditional will fail in MessageService.java
+        
+        try
+        {
+            Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
+            
+        String sql = "select * from account where (account_id) = (?)";
+        
+        PreparedStatement preparedStatement = connection.prepareStatement(sql); 
+        preparedStatement.setInt(1,userId);
+        
+        ResultSet rs = preparedStatement.executeQuery();
+        // Need a ResultSet here as we are returning in the body of the JSON an Account along with its associated id
+        if (rs.next()) {
+            Account account = new Account(); // Need to create an object like we did so that we can return (potentially) an object 
+            account.setUsername(rs.getString("username"));
+            account.setPassword(rs.getString("password"));
+            account.setAccount_id(rs.getInt("account_id"));
+
+            return account;
+        }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        } 
+        return null;
+    }
+
 }
 
 
