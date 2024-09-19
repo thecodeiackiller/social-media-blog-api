@@ -38,21 +38,36 @@ public class MessageService {
         // Not sure if we actually need a service method for this method, but need to keep eyes peeled.
     }
 
-    public void getNewMessageById()
+    public void getNewMessageById(int message_id)
     {
-        throw new UnsupportedOperationException("Not yet implemented");
-        // NOTE: This is for the getMessageById() method in the MessageDAO.java class
-        // NOTE: It will ultimately be this method that is called in the controller which handles the web requests
-        // NOTE: Judging by the look of it, It doesn't look like there needs to be any business logic here, but keep eyes peeled
-        
-        // Requirements
-        // 1. I should be able to submit a GET request on the endpoint GET localhost:8080/messages/{message_id}.
+        MessageDAO.getMessageById(message_id);
+    }
 
-        // Conditions
-        // 2. The response body should contain a JSON representation of the message identified by the message_id. 
-        // 3. It is expected for the response body to simply be empty if there is no such message.
-        // 4. The response status should always be 200, which is the default.
+    public Message updateAMessageById(Message message, int message_id)
+    {
+       
+        // This service supports the update updateMessageById() method in MessageDAO.java
+        // Requirements: the update of a message should be successful if and only if:
+        // 1. the message id already exists - feel like we need another method to do this (I finally understand the need to for loops and foreach loops. For just checking if something is there so we can do something else.)
+        // 2  new message_text is not blank 
+        // 3. Message text not over 255 characters. (definitely going to need a service layer for this business logic)
 
+if((MessageDAO.checkIfMessageIdExists(message_id) == true) 
+&& (message.getMessage_text() != null)
+&& message.getMessage_text().length() < 255)
+{
+    return MessageDAO.updateMessageById(message,message_id);
+}
+return null; 
+    }
+
+    public void getAllMessagesFromSingularUser(int account_id)
+    {
+        MessageDAO messageDAO = new MessageDAO();
+        messageDAO.getAllMessagesFromSingleUser(account_id);
+        // This service method would be for the getAllMessagesFromSingleUser in the MessageDAO.
+        // Might not need any business logic here in the service layer, but we can verify later
+        // Also a big note
     }
 
 

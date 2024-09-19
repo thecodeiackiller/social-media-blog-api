@@ -9,7 +9,7 @@ import DAO.AccountDAO;
 import DAO.MessageDAO;
 
 public class AccountService {
-    public void addNewUser(Account account)
+    public Account addNewUser(Account account)
     {
         // DAO method registerUser input here after conditionals
         // 3. The registration will be successful if and only if the username is not blank
@@ -27,10 +27,11 @@ public class AccountService {
                 // NOTE: In C#, we can use == to compare string, but in Java we need .equals as == compares the references, not the values in Java
                 if (user.equals(account.getUsername())) {
                     System.out.println("This username already exists. Please pick another one");
+                    
                 }
                 else
                 {
-                    AccountDAO.registerUser(account);
+                    return AccountDAO.registerUser(account);
                 }
             }
         } 
@@ -39,6 +40,7 @@ public class AccountService {
         {
             e.printStackTrace();
         }
+        return null;
     }
 
     public boolean checkIfUserExists(String username)

@@ -2,6 +2,8 @@ package DAO;
 
 
 import Util.ConnectionUtil;
+import kotlin.NotImplementedError;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +97,7 @@ public class MessageDAO {
         return messageList;         
     }
 
-    public Message getMessageById(int message_id)
+    public static Message getMessageById(int message_id)
     {
         // Requirements
         // 1. I should be able to submit a GET request on the endpoint GET localhost:8080/messages/{message_id}.
@@ -112,7 +114,7 @@ public class MessageDAO {
         {
             Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
             
-        String sql = "select * from message where (account_id) = (?)";
+        String sql = "select * from message where (message_id) = (?)";
         
         PreparedStatement preparedStatement = connection.prepareStatement(sql); 
         preparedStatement.setInt(1,message_id);
@@ -136,42 +138,138 @@ public class MessageDAO {
         return message == null ? new Message() : message;
     }
 
-    public void deleteMessageById()
+    public Message deleteMessageById(int message_id)
     {
-        throw new UnsupportedOperationException("Not yet implemented");
-        
         // Requirements
         // 1. As a User, I should be able to submit a DELETE request on the endpoint DELETE localhost:8080/messages/{message_id}.
 
         // Conditions
-        // 1. The deletion of an existing message should remove an existing message from the database. 
+        // 1. The dresponeletion of an existing message should remove an existing message from the database. 
         // 2. If the message existed, the response body should contain the now-deleted message. 
         // 3. The response status should be 200, which is the default.
         // 4. If the message did not exist, the response status should be 200, but the response body should be empty. This is because the DELETE verb is intended to be idempotent, ie, multiple calls to the DELETE endpoint should respond with the same type of response.       
+
+        // NOTE: Important to note that delete doesn't return a resultset
+        // NOTE: Instead of using executeQuery we will use executeUpdate
+
+        Message message = new Message(); // Instantiating a new message object
+        // First, we need to see if we can't retrive a message by message id. Hey!! We've already created that method
+        message = getMessageById(message_id); // Regardless of what this returns (empty object or full object) we need to set it to a message
+        if(message != null)
+        {
+            try
+            {
+                Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
+                
+                String sql = "delete from message where (message_id) = (?)";
+                
+                PreparedStatement preparedStatement = connection.prepareStatement(sql); 
+                preparedStatement.setInt(1,message_id);
+                
+                preparedStatement.executeUpdate(sql);
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+            } 
+        }
+        return message;  
     }
 
-    public void updateMessageById()
+    public static Message updateMessageById(Message message, int message_id)
     {
-        throw new UnsupportedOperationException("Not yet implemented");
-        
         // Requirements
         // 1. As a user, I should be able to submit a PATCH request on the endpoint PATCH localhost:8080/messages/{message_id}. 
         // 2. The request body should contain a new message_text values to replace the message identified by message_id. The request body can not be guaranteed to contain any other information.
 
-        // 3. The update of a message should be successful if and only if the message id already exists and the new message_text is not blank and is not over 255 characters. 
+        // 3. The update of a message should be successful if and only if the message id already exists and the new message_text is not blank and is not over 255 characters. (definitely going to need a service layer for this business logic)
         // 4. If the update is successful, the response body should contain the full updated message (including message_id, posted_by, message_text, and time_posted_epoch)
         // 5. If the update is successful the response status should be 200, which is the default. The message existing on the database should have the updated message_text.
         // 6. If the update of the message is not successful for any reason, the response status should be 400. (Client error)        
+
+        // Ultimately, were going to use the message.getMessageText where message.getMessageId = some id
+        // Instantiating a new message object
+        // First, we need to see if we can't retrive a message by message id. Hey!! We've already created that method
+            try
+            {
+                Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
+                
+                String sql = "update message" +
+                "set message_text = (?) " +
+                " where message_id = (?)";
+                
+                PreparedStatement preparedStatement = connection.prepareStatement(sql); 
+                preparedStatement.setString(1,message.getMessage_text());
+                preparedStatement.setInt(2,message_id);
+                
+                preparedStatement.executeUpdate(sql);
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+            } 
+        return message;  
     }
     
-    public void getAllMessagesFromSingleUser()
+    public List<String> getAllMessagesFromSingleUser(int account_id)
     {
-        throw new UnsupportedOperationException("Not yet implemented");
-
         // 1. As a user, I should be able to submit a GET request on the endpoint GET localhost:8080/accounts/{account_id}/messages.
         // 2. The response body should contain a JSON representation of a list containing all messages posted by a particular user, which is retrieved from the database.
         // 3. It is expected for the list to simply be empty if there are no messages. 
         // 4. The response status should always be 200, which is the default.
+        List<String> messageListByUser = new ArrayList<>();
+        try
+        {
+            Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
+            
+        String sql = "select message_text from message where message_id = (?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql); 
+        
+        ResultSet rs = preparedStatement.executeQuery();
+        // Need a ResultSet here as we are returning in the body of the JSON an Account along with its associated id
+        
+        while(rs.next())
+        {
+            messageListByUser.add(rs.getString("message_text"));
+        }
+        
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }  
+        return messageListByUser;  
+    }
+
+    public static boolean checkIfMessageIdExists(int message_id)
+    {
+        // We can use this method in our MessageService layer
+        try
+        {
+            Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
+            
+        String sql = "select message_id from message";
+        
+        PreparedStatement preparedStatement = connection.prepareStatement(sql); 
+        
+        
+        ResultSet rs = preparedStatement.executeQuery();
+        
+        // Need a ResultSet here as we are returning in the body of the JSON an Account along with its associated id
+        if (rs.next()) {
+             // Need to create an object like we did so that we can return (potentially) an object 
+            if(rs.getInt("message_id") == message_id)
+            {
+                return true;
+            }
+        }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        } 
+        
+        return false;
     }
 
 }
