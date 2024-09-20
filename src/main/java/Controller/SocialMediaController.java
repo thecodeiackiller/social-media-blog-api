@@ -39,8 +39,10 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         app.get("example-endpoint", this::exampleHandler);
+        app.get("/", this::defaultRootHandler);
+       
         app.post("/register", this::registerNewUserHandler);
-        app.start(8080);
+        // app.start(8080); Commenting this line out as Error was thrown that there was an IllegalStateException - Server already started 
 
         return app;
     }
@@ -53,9 +55,15 @@ public class SocialMediaController {
         context.json("sample text");
     }
 
+    private void defaultRootHandler(Context ctx) throws JsonProcessingException
+    {
+        ctx.result("Welcome to the API");
+    }
+
     private void registerNewUserHandler(Context ctx) throws JsonProcessingException
     {
-        ObjectMapper mapper = new ObjectMapper();
+        try{
+            ObjectMapper mapper = new ObjectMapper();
         // We know were going to need to call the underlying method at some point
         Account account = mapper.readValue(ctx.body(), Account.class);
         account = accountService.addNewUser(account);
@@ -65,9 +73,20 @@ public class SocialMediaController {
         {
             ctx.json((account)).status(201);
         }
-        ctx.status(400).result("Something went wrong the client is to blame, baby.");
-        // Also if registration not successful, response status should be 400
+        }
+        catch (JsonProcessingException e)
+        {
+            ctx.status(400).result("Please format your JSON correctly");
+        }
+        catch (Exception e)
+        {
+            ctx.status(500).result("Ergg, somethings up with the server:" + e.getMessage());
+        }
+        
+        
     }
+
+    
 
     
 
