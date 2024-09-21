@@ -57,7 +57,7 @@ public class AccountDAO {
         {
             Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
             
-        String sql = "select * from account where (username) = (?)";
+        String sql = "select * from account where username = ?";
         
         PreparedStatement preparedStatement = connection.prepareStatement(sql); 
         preparedStatement.setString(1,checkedUsername);

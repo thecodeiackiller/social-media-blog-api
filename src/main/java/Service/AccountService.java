@@ -43,16 +43,16 @@ public class AccountService {
         return null;
     }
 
-    public boolean checkIfUserExists(String username)
+    public Account checkIfUserExists(String username)
     {
         // We know that this is going to take in a username string and that same string can be used to get the data from the db
         Account serviceAccountObj = new Account();
         serviceAccountObj = AccountDAO.verifyUser(username);
         if(serviceAccountObj == null) // We cannot use .equals method here because serviceAccountObj could potentially be null which would lead to a nullpointerexception
         {
-            return false;
+            return null;
         }
-        return true; 
+        return serviceAccountObj; 
     }
 
     

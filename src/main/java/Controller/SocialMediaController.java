@@ -43,7 +43,7 @@ public class SocialMediaController {
        
         app.post("/register", this::registerNewUserHandler);
         // app.start(8080); Commenting this line out as Error was thrown that there was an IllegalStateException - Server already started 
-
+        app.post("/login", this::verifyNewUserHandler);
         return app;
     }
 
@@ -82,8 +82,40 @@ public class SocialMediaController {
         {
             ctx.status(500).result("Ergg, somethings up with the server:" + e.getMessage());
         }
+    }
+
+    private void verifyNewUserHandler(Context ctx) throws JsonProcessingException
+    {
+        System.out.println("verify handler has been hit");
+        // First, need to wrap this in a try catch to catch possible exception
+        try{
+            // The Context class here comes from the Javalin API
+        // Object mapper will come from Jackson dependency
+        ObjectMapper mapper = new ObjectMapper();
+        // Need to take in the json which included a user name or password and convert that to an Account object
+        Account verifiableAccount = mapper.readValue(ctx.body(),Account.class);
+        // Need to pass the verifiableAccount into our Account service method. The method returns a boolean, but should It return a Account object?
+        Account potentiallyVerifiedAccount = accountService.checkIfUserExists(verifiableAccount.getUsername()); // This returns boolean, maybe needs to return Account.
+        // Need to return back some json
+        if(potentiallyVerifiedAccount != null)
+        {
+            ctx.json(potentiallyVerifiedAccount).status(200);
+        }
+        // else
+        // {
+        //     ctx.result("Something is wrong with the return JSON and potentiallyVerfiiedAccount is null");
+        // }
+        }
+        catch(JsonProcessingException e)
+        {
+            ctx.result("Something was wrong with the JSON").status(401);
+        }
+        catch(Exception e)
+        {
+            ctx.result(e.getMessage()).status(500);
+        }
         
-        
+
     }
 
     
