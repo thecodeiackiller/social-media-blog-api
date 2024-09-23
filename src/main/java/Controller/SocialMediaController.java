@@ -71,8 +71,12 @@ public class SocialMediaController {
         
         if(account != null)
         {
-            ctx.json((account)).status(201);
+            ctx.json((account)).status(200);
         }
+    }
+        catch (IllegalArgumentException e)
+        {
+            ctx.status(400).result("");
         }
         catch (JsonProcessingException e)
         {
@@ -95,20 +99,20 @@ public class SocialMediaController {
         // Need to take in the json which included a user name or password and convert that to an Account object
         Account verifiableAccount = mapper.readValue(ctx.body(),Account.class);
         // Need to pass the verifiableAccount into our Account service method. The method returns a boolean, but should It return a Account object?
-        Account potentiallyVerifiedAccount = accountService.checkIfUserExists(verifiableAccount.getUsername()); // This returns boolean, maybe needs to return Account.
+        Account potentiallyVerifiedAccount = accountService.checkIfUserExists(verifiableAccount.getUsername(), verifiableAccount.getPassword()); // This returns boolean, maybe needs to return Account.
         // Need to return back some json
         if(potentiallyVerifiedAccount != null)
         {
             ctx.json(potentiallyVerifiedAccount).status(200);
         }
-        // else
-        // {
-        //     ctx.result("Something is wrong with the return JSON and potentiallyVerfiiedAccount is null");
-        // }
+        else
+        {
+            ctx.status(401).result("");
+        }
         }
         catch(JsonProcessingException e)
         {
-            ctx.result("Something was wrong with the JSON").status(401);
+            ctx.status(401);
         }
         catch(Exception e)
         {

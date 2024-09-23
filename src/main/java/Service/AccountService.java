@@ -15,26 +15,26 @@ public class AccountService {
         // 3. The registration will be successful if and only if the username is not blank
         // 4. The registration will be successful if the password is at least 4 characters long
         // 5. The registration will be successful if the Account with that username does not already exist. 
-        try
+       
+        if(account.getPassword().length() < 4)
         {
-            if((account.getUsername() != null) && (account.getPassword().length() > 3))
-        {
+            throw new IllegalArgumentException();
+        }
+        if (account.getUsername() == "") {
+            throw new IllegalArgumentException();
+        }
+        try{
             List<String> checkUserNameList = new ArrayList<String>();
             checkUserNameList = AccountDAO.getAllCurrentUsernames();
-            
+
             for(String user : checkUserNameList)
             {
                 // NOTE: In C#, we can use == to compare string, but in Java we need .equals as == compares the references, not the values in Java
                 if (user.equals(account.getUsername())) {
-                    System.out.println("This username already exists. Please pick another one");
-                    
-                }
-                else
-                {
-                    return AccountDAO.registerUser(account);
-                }
+                    throw new IllegalArgumentException();
+                } 
             }
-        } 
+            return AccountDAO.registerUser(account);
         }
         catch (SQLException e)
         {
@@ -43,11 +43,11 @@ public class AccountService {
         return null;
     }
 
-    public Account checkIfUserExists(String username)
+    public Account checkIfUserExists(String username, String password)
     {
         // We know that this is going to take in a username string and that same string can be used to get the data from the db
         Account serviceAccountObj = new Account();
-        serviceAccountObj = AccountDAO.verifyUser(username);
+        serviceAccountObj = AccountDAO.verifyUser(username,password);
         if(serviceAccountObj == null) // We cannot use .equals method here because serviceAccountObj could potentially be null which would lead to a nullpointerexception
         {
             return null;

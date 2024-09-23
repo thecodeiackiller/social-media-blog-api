@@ -42,7 +42,7 @@ public class AccountDAO {
         return null;
     }
 
-    public static Account verifyUser(String checkedUsername)
+    public static Account verifyUser(String checkedUsername, String checkedPassword)
     {
         // Basically, we want to see the the Account we return is null or if there's actual data.
         
@@ -57,10 +57,11 @@ public class AccountDAO {
         {
             Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
             
-        String sql = "select * from account where username = ?";
+        String sql = "select * from account where username = ? and password = ?";
         
         PreparedStatement preparedStatement = connection.prepareStatement(sql); 
         preparedStatement.setString(1,checkedUsername);
+        preparedStatement.setString(2, checkedPassword);
         
         ResultSet rs = preparedStatement.executeQuery();
         // Need a ResultSet here as we are returning in the body of the JSON an Account along with its associated id
