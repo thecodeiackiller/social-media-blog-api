@@ -17,9 +17,16 @@ public class MessageService {
         // 4. Message is not over 255 characters (this logic will happen in the service layer)
         // 5. Message has to be posted by a real user (check for this in service layer (message_id is foreign key to user_id)) 
         // NOTE: We can probably just use the method we created in the AccountService class for this (number 5)
-        if((message.message_text.length() > 255) && (message.message_text != null))
+        if(message.message_text.length() > 255)
         {
-            int verifiedUser = message.getMessage_id();
+            throw new IllegalArgumentException();
+        }
+        if(message.message_text == "")
+        {
+            throw new IllegalArgumentException();    
+        }
+        
+            int verifiedUser = message.getPosted_by();
             if(AccountDAO.verifyUserById(verifiedUser) != null) 
             //We currently have verifiedUser as type int. We can't really get the string username without the account table. 
             // But then again, I'm  thinking this might be a time for a join.
@@ -27,7 +34,10 @@ public class MessageService {
             {
                 MessageDAO.postMessage(message);
             }
-        }
+            else
+            {
+                throw new IllegalArgumentException();
+            }
         return null;
     }
 

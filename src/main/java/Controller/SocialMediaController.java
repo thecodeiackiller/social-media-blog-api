@@ -1,9 +1,12 @@
 package Controller;
 
+import static org.mockito.ArgumentMatchers.nullable;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import Model.Account;
+import Model.Message;
 import Service.AccountService;
 import Service.MessageService;
 import io.javalin.Javalin;
@@ -44,6 +47,8 @@ public class SocialMediaController {
         app.post("/register", this::registerNewUserHandler);
         // app.start(8080); Commenting this line out as Error was thrown that there was an IllegalStateException - Server already started 
         app.post("/login", this::verifyNewUserHandler);
+        app.post("/messages", this::postMessageHandler);
+
         return app;
     }
 
@@ -118,13 +123,25 @@ public class SocialMediaController {
         {
             ctx.result(e.getMessage()).status(500);
         }
-        
-
+    
     }
 
-    
+    public void postMessageHandler(Context ctx) throws JsonProcessingException
+    {
+        try
+        {
+            ObjectMapper mapper = new ObjectMapper();
+            Message message = mapper.readValue(ctx.body(), Message.class);
+            Message verifiedMessage = messageService.postNewMessage(message);
 
-    
-
-
+            if(verifiedMessage != null)
+            {
+                ctx.status(200);
+            }
+        }
+        catch (IllegalArgumentException e)
+        {
+            ctx.status(400);
+        }
+    }
 }
