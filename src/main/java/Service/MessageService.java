@@ -32,25 +32,29 @@ public class MessageService {
             // But then again, I'm  thinking this might be a time for a join.
             // But then again, I'm thinking we can just create a new method that returns a message based on the id so why create a join 
             {
-                MessageDAO.postMessage(message);
+                return MessageDAO.postMessage(message);
             }
             else
             {
                 throw new IllegalArgumentException();
             }
-        return null;
+        
     }
 
     public List<Message> returnAllMessages()
     {
-        throw new UnsupportedOperationException();
-        // This is for the getAllMessages() method for the MessgaesDAO
-        // Not sure if we actually need a service method for this method, but need to keep eyes peeled.
+       return MessageDAO.getAllMessages();
+        
     }
 
-    public void getNewMessageById(int message_id)
+    public Message getNewMessageById(int message_id)
     {
-        MessageDAO.getMessageById(message_id);
+        return MessageDAO.getMessageById(message_id);
+    }
+
+    public Message deleteMessageById(int message_id)
+    {
+        return MessageDAO.deleteMessageById(message_id);
     }
 
     public Message updateAMessageById(Message message, int message_id)
@@ -62,13 +66,21 @@ public class MessageService {
         // 2  new message_text is not blank 
         // 3. Message text not over 255 characters. (definitely going to need a service layer for this business logic)
 
-if((MessageDAO.checkIfMessageIdExists(message_id) == true) 
-&& (message.getMessage_text() != null)
-&& message.getMessage_text().length() < 255)
-{
-    return MessageDAO.updateMessageById(message,message_id);
-}
-return null; 
+        if(MessageDAO.checkIfMessageIdExists(message_id) == false)
+        {
+            throw new IllegalArgumentException(); 
+        } 
+        else if(message.getMessage_text() == "")
+        {
+            throw new IllegalArgumentException();
+        }
+        else if (message.getMessage_text().length() > 255) {
+            throw new IllegalArgumentException();
+        }
+        else {
+            return MessageDAO.updateMessageById(message,message_id);
+        }
+
     }
 
     public void getAllMessagesFromSingularUser(int account_id)

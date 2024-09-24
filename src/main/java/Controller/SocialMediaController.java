@@ -2,6 +2,9 @@ package Controller;
 
 import static org.mockito.ArgumentMatchers.nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -48,6 +51,10 @@ public class SocialMediaController {
         // app.start(8080); Commenting this line out as Error was thrown that there was an IllegalStateException - Server already started 
         app.post("/login", this::verifyNewUserHandler);
         app.post("/messages", this::postMessageHandler);
+        app.get("/messages", this::retriveAllMessagesHandler);
+        app.get("messages/{message_id}", this::retriveMessageById);
+        app.delete("messages/{message_id}", this::deleteMessageById);
+        app.patch("messages/{message_id}", this::updateMessageById);
 
         return app;
     }
@@ -136,7 +143,63 @@ public class SocialMediaController {
 
             if(verifiedMessage != null)
             {
-                ctx.status(200);
+                ctx.json(verifiedMessage).status(200);
+            }
+        }
+        catch (IllegalArgumentException e)
+        {
+            ctx.status(400);
+        }
+    }
+
+    public void retriveAllMessagesHandler(Context ctx) throws JsonProcessingException
+    {
+            List<Message> messages = new ArrayList<Message>();
+            messages = messageService.returnAllMessages();
+            ctx.json(messages).status(200);
+        
+    }
+
+    public void retriveMessageById(Context ctx) throws JsonProcessingException
+    {
+        // In order to do this, we need to extract the path parameter in the request similar to what we did with Blazor this morning
+        // And like we did in blazor with PlanId:int, we have to do this in java with Integer.parseInt(ctx.pathParam("message_id"))
+        // We literally aren't mapping anything here. We're getting the integer value from the endpoint request
+        // Extract the message_id from the path parameter
+    Integer message_id = Integer.parseInt(ctx.pathParam("message_id"));
+    Message message = messageService.getNewMessageById(message_id);
+    if (message.getMessage_text() != null) {   
+        ctx.json(message).status(200);
+    } else {
+        
+        ctx.result("").status(200);
+    }  
+    }
+
+    public void deleteMessageById(Context ctx) throws JsonProcessingException
+    {
+        Integer message_id = Integer.parseInt(ctx.pathParam("message_id"));
+        Message message = messageService.deleteMessageById(message_id);
+        if (message.getMessage_text() != null) {   
+            ctx.json(message).status(200);
+        } else {
+            
+            ctx.result("").status(200);
+        }  
+    }
+
+    public void updateMessageById(Context ctx) throws JsonProcessingException
+    {
+        Integer message_id = Integer.parseInt(ctx.pathParam("message_id"));
+        try
+        {
+            ObjectMapper mapper = new ObjectMapper();
+            Message message = mapper.readValue(ctx.body(), Message.class);
+            Message returnMessage = messageService.updateAMessageById(message,message_id);
+
+            if(returnMessage != null)
+            {
+                ctx.json(returnMessage).status(200);
             }
         }
         catch (IllegalArgumentException e)

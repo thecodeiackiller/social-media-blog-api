@@ -122,7 +122,7 @@ public class AccountDAO {
             
         String sql = "select * from account where (account_id) = (?)";
         
-        PreparedStatement preparedStatement = connection.prepareStatement(sql); 
+        PreparedStatement preparedStatement = connection.prepareStatement(sql); // Feel like the RETURN PRIMARY KEY ID parameter potentially
         preparedStatement.setInt(1,userId);
         
         ResultSet rs = preparedStatement.executeQuery();

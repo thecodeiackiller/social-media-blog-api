@@ -44,7 +44,7 @@ public class MessageDAO {
             ResultSet rs = preparedStatement.getGeneratedKeys();
             while(rs.next())
             {
-                int generated_message_id = (int) rs.getLong(1);
+                int generated_message_id = (int) rs.getInt(1);
                 return new Message(generated_message_id, message.getPosted_by(),message.getMessage_text(), message.getTime_posted_epoch());
             }
         }
@@ -56,7 +56,7 @@ public class MessageDAO {
 
     }
 
-    public List<Message> getAllMessages()
+    public static List<Message> getAllMessages()
     {   
         // Requirements
         // 1. A a user, should be able to submit a GET request on enpoint localhost:8080/messages.
@@ -129,16 +129,17 @@ public class MessageDAO {
             message.setPosted_by(rs.getInt("posted_by"));
             message.setTime_posted_epoch(rs.getLong("time_posted_epoch"));
         }
+       
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         } 
         
-        return message == null ? new Message() : message;
+        return message == null ? null : message;
     }
 
-    public Message deleteMessageById(int message_id)
+    public static Message deleteMessageById(int message_id)
     {
         // Requirements
         // 1. As a User, I should be able to submit a DELETE request on the endpoint DELETE localhost:8080/messages/{message_id}.
@@ -194,9 +195,7 @@ public class MessageDAO {
             {
                 Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
                 
-                String sql = "update message" +
-                "set message_text = (?) " +
-                " where message_id = (?)";
+                String sql = "update message set message_text = (?) where message_id = (?)";
                 
                 PreparedStatement preparedStatement = connection.prepareStatement(sql); 
                 preparedStatement.setString(1,message.getMessage_text());
