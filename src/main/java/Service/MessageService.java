@@ -83,10 +83,10 @@ public class MessageService {
 
     }
 
-    public void getAllMessagesFromSingularUser(int account_id)
+    public List<Message> getAllMessagesFromSingularUser(int account_id)
     {
         MessageDAO messageDAO = new MessageDAO();
-        messageDAO.getAllMessagesFromSingleUser(account_id);
+        return messageDAO.getAllMessagesFromSingleUser(account_id);
         // This service method would be for the getAllMessagesFromSingleUser in the MessageDAO.
         // Might not need any business logic here in the service layer, but we can verify later
         // Also a big note

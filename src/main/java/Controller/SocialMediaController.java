@@ -56,6 +56,7 @@ public class SocialMediaController {
         app.get("messages/{message_id}", this::retriveMessageById);
         app.delete("messages/{message_id}", this::deleteMessageById);
         app.patch("messages/{message_id}", this::updateMessageById);
+        app.get("/accounts/{account_id}/messages", this::getAllMessageFromUserId);
 
         return app;
     }
@@ -210,5 +211,29 @@ public class SocialMediaController {
         {
             ctx.status(400);
         }
+    }
+
+    public void getAllMessageFromUserId(Context ctx) throws JsonProcessingException
+    {
+
+        Integer account_id = Integer.parseInt(ctx.pathParam("account_id"));
+        try
+        {
+            
+            // We can now use JsonNode class to be able to read values from the Json. This is like JsonNode or JsonDocument in C# .NET
+
+            List<Message> returnMessages = messageService.getAllMessagesFromSingularUser(account_id);
+
+            if(returnMessages != null)
+            {
+                ctx.json(returnMessages).status(200);
+            }
+        }
+        catch (IllegalArgumentException e)
+        {
+            ctx.status(400);
+        }
+
+        messageService.getAllMessagesFromSingularUser(0);
     }
 }

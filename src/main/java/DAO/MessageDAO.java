@@ -212,18 +212,18 @@ public class MessageDAO {
         return message;
     }
     
-    public List<String> getAllMessagesFromSingleUser(int account_id)
+    public List<Message> getAllMessagesFromSingleUser(int account_id)
     {
         // 1. As a user, I should be able to submit a GET request on the endpoint GET localhost:8080/accounts/{account_id}/messages.
         // 2. The response body should contain a JSON representation of a list containing all messages posted by a particular user, which is retrieved from the database.
         // 3. It is expected for the list to simply be empty if there are no messages. 
         // 4. The response status should always be 200, which is the default.
-        List<String> messageListByUser = new ArrayList<>();
+        List<Message> messageListByUser = new ArrayList<>();
         try
         {
             Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
             
-        String sql = "select message_text from message where message_id = (?)";
+        String sql = "select * from message where message_id = (?)";
         PreparedStatement preparedStatement = connection.prepareStatement(sql); 
         
         ResultSet rs = preparedStatement.executeQuery();
@@ -231,10 +231,16 @@ public class MessageDAO {
         
         while(rs.next())
         {
-            messageListByUser.add(rs.getString("message_text"));
-        }
+            Message newMessage = new Message();
+            newMessage.setMessage_id(rs.getInt("message_id"));
+            newMessage.setMessage_text(rs.getString("message_text"));
+            newMessage.setPosted_by(rs.getInt("posted_by"));
+            newMessage.setTime_posted_epoch(rs.getLong("time_posted_epoch"));
+
+            messageListByUser.add(newMessage);
         
         }
+    }
         catch (SQLException e)
         {
             e.printStackTrace();
@@ -249,17 +255,18 @@ public class MessageDAO {
         {
             Connection connection = ConnectionUtil.getConnection(); // Looks like we also have to import our java.util packages (java.sql.*)
             
-        String sql = "select message_id from message";
+        String sql = "select * from message where message_id = ?";
         
         PreparedStatement preparedStatement = connection.prepareStatement(sql); 
+        preparedStatement.setInt(1, message_id);
         
         
         ResultSet rs = preparedStatement.executeQuery();
         
         // Need a ResultSet here as we are returning in the body of the JSON an Account along with its associated id
-        if (!rs.next()) {
+        if (rs.next()) {
              // Need to create an object like we did so that we can return (potentially) an object          
-                return false;
+                return true;
   
         }
         }
@@ -268,9 +275,7 @@ public class MessageDAO {
             e.printStackTrace();
             
         } 
-        return true;
-        
-       
+        return false;
     }
 
 }
