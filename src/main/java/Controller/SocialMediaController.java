@@ -228,12 +228,14 @@ public class SocialMediaController {
             {
                 ctx.json(returnMessages).status(200);
             }
+            else
+            {
+                ctx.result("").status(200);
+            }
         }
         catch (IllegalArgumentException e)
         {
             ctx.status(400);
-        }
-
-        messageService.getAllMessagesFromSingularUser(0);
+        }  
     }
 }

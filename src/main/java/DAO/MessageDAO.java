@@ -225,7 +225,7 @@ public class MessageDAO {
             
         String sql = "select * from message where message_id = (?)";
         PreparedStatement preparedStatement = connection.prepareStatement(sql); 
-        
+        preparedStatement.setInt(1, account_id);
         ResultSet rs = preparedStatement.executeQuery();
         // Need a ResultSet here as we are returning in the body of the JSON an Account along with its associated id
         
