@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import Model.Account;
@@ -194,7 +195,10 @@ public class SocialMediaController {
         try
         {
             ObjectMapper mapper = new ObjectMapper();
-            Message message = mapper.readValue(ctx.body(), Message.class);
+            // We can now use JsonNode class to be able to read values from the Json. This is like JsonNode or JsonDocument in C# .NET
+            JsonNode body = mapper.readTree(ctx.body());
+
+            String message = body.get("message_text").asText();
             Message returnMessage = messageService.updateAMessageById(message,message_id);
 
             if(returnMessage != null)

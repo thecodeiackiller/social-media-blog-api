@@ -57,7 +57,7 @@ public class MessageService {
         return MessageDAO.deleteMessageById(message_id);
     }
 
-    public Message updateAMessageById(Message message, int message_id)
+    public Message updateAMessageById(String message, int message_id)
     {
        
         // This service supports the update updateMessageById() method in MessageDAO.java
@@ -66,15 +66,15 @@ public class MessageService {
         // 2  new message_text is not blank 
         // 3. Message text not over 255 characters. (definitely going to need a service layer for this business logic)
 
-        if(MessageDAO.checkIfMessageIdExists(message_id) == false)
-        {
-            throw new IllegalArgumentException(); 
-        } 
-        else if(message.getMessage_text() == "")
+        if(message == "")
         {
             throw new IllegalArgumentException();
         }
-        else if (message.getMessage_text().length() > 255) {
+        else if(MessageDAO.messageIdIsInThere(message_id) == false)
+        {
+            throw new IllegalArgumentException(); 
+        }
+        else if (message.length() > 255) {
             throw new IllegalArgumentException();
         }
         else {

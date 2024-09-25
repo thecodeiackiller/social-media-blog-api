@@ -177,7 +177,7 @@ public class MessageDAO {
         return message;  
     }
 
-    public static Message updateMessageById(Message message, int message_id)
+    public static Message updateMessageById(String message_text, int message_id)
     {
         // Requirements
         // 1. As a user, I should be able to submit a PATCH request on the endpoint PATCH localhost:8080/messages/{message_id}. 
@@ -198,16 +198,18 @@ public class MessageDAO {
                 String sql = "update message set message_text = (?) where message_id = (?)";
                 
                 PreparedStatement preparedStatement = connection.prepareStatement(sql); 
-                preparedStatement.setString(1,message.getMessage_text());
+                preparedStatement.setString(1,message_text);
                 preparedStatement.setInt(2,message_id);
                 
-                preparedStatement.executeUpdate(sql);
+                preparedStatement.executeUpdate();
             }
             catch (SQLException e)
             {
                 e.printStackTrace();
             } 
-        return message;  
+        Message message = new Message();
+        message = getMessageById(message_id);
+        return message;
     }
     
     public List<String> getAllMessagesFromSingleUser(int account_id)
@@ -240,7 +242,7 @@ public class MessageDAO {
         return messageListByUser;  
     }
 
-    public static boolean checkIfMessageIdExists(int message_id)
+    public static Boolean messageIdIsInThere(int message_id)
     {
         // We can use this method in our MessageService layer
         try
@@ -255,20 +257,20 @@ public class MessageDAO {
         ResultSet rs = preparedStatement.executeQuery();
         
         // Need a ResultSet here as we are returning in the body of the JSON an Account along with its associated id
-        if (rs.next()) {
-             // Need to create an object like we did so that we can return (potentially) an object 
-            if(rs.getInt("message_id") == message_id)
-            {
-                return true;
-            }
+        if (!rs.next()) {
+             // Need to create an object like we did so that we can return (potentially) an object          
+                return false;
+  
         }
         }
         catch (SQLException e)
         {
             e.printStackTrace();
+            
         } 
+        return true;
         
-        return false;
+       
     }
 
 }
