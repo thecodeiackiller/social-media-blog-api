@@ -54,8 +54,3 @@ The provided `SocialMediaController` class was extended to handle the required A
 ---
 
 This project demonstrates the implementation of a basic social media backend, handling user and message management while adhering to RESTful API design principles.
-
-
-You SHOULD be creating and designing DAO and Service class to allow you to complete the project. In theory, you could design the project however you like, so long as the functionality works and you are somehow persisting data to the database - but a 3-layer architecture is a robust design pattern and following help you in the long run. You can refer to prior mini-projects and course material for help on designing your application in this way.
-
-# Good luck!
