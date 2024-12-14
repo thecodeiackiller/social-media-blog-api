@@ -1,7 +1,7 @@
 # Social Media Blog API
 
 ## Project Overview
-This project was developed as part of an 11-week Java training course with Revature. The goal was to build the backend of a hypothetical social media app, similar to a micro-blogging or messaging platform. The backend manages user accounts and the messages they post, providing endpoints for handling user registration, login, message creation, retrieval, deletion, and updates.
+This project was developed as part of an 11-week Java training course. The goal was to build the backend of a hypothetical social media app, similar to a micro-blogging or messaging platform. The backend manages user accounts and the messages they post, providing endpoints for handling user registration, login, message creation, retrieval, deletion, and updates.
 
 ## Database Tables
 The project utilizes two main database tables:
